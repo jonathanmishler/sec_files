@@ -13,10 +13,13 @@ from .settings import Settings
 class SecFiles:
     """Class Object to help parse and download the Sec files"""
 
+    BASE_HEADERS = {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
+    }
     BASE_URL = "https://www.sec.gov"
     FILES_URL = f"{BASE_URL}/dera/data/financial-statement-data-sets.html"
 
-    def __init__(self, start_date: str = '1900-01-01') -> None:
+    def __init__(self, start_date: str = "1900-01-01") -> None:
         self.start_date = datetime.date.fromisoformat(start_date)
         self.config = Settings()
         self.is_downloaded = False
@@ -98,7 +101,7 @@ class SecFiles:
         logging.info("Scraping the urls from the SEC webpage")
         url_list = self.get_urls()
 
-        with httpx.Client(base_url=self.BASE_URL) as client:
+        with httpx.Client(base_url=self.BASE_URL, headers=self.BASE_HEADERS) as client:
             for url in url_list:
 
                 year = url.get("year")
@@ -134,13 +137,14 @@ class SecFiles:
     @staticmethod
     def parse_row(row: list) -> dict:
         """Parses the url for each year and quarter in the table"""
-        year, qtr = row[0].text.upper().strip().split(": ")[-1].split()
-        url = row[0].find("a").attrs["href"]
+        anchor = row[0].find("a")
+        year, qtr = anchor.text.upper().strip().split()
+        url = anchor.attrs["href"]
         return dict(year=year, qtr=qtr, url=url)
 
     def get_urls(self) -> List[dict]:
         """Gets the list of URLs for the financial files for each year and quarter on the webpage"""
-        r = httpx.get(self.FILES_URL)
+        r = httpx.get(self.FILES_URL, headers=self.BASE_HEADERS)
         r.raise_for_status()
         page = BeautifulSoup(r.text, "html.parser")
         tbody = page.find("table").find("tbody")
