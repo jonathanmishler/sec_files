@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+    db:
+        image: postgres:14.1-bullseye
+        ports:
+            - ${DB_PORT}:5432
+        volumes: 
+            - dbdata:/var/lib/postgresql/data
+        restart: always
+        environment:
+            POSTGRES_DB: ${DB_NAME}
+            POSTGRES_USER: ${DB_USERNAME}
+            POSTGRES_PASSWORD_FILE: run/secrets/db_password
+        secrets:
+            - db_password
+
+secrets:
+    db_password:
+        file: ./secrets/db_password
+
+volumes:
+    dbdata:

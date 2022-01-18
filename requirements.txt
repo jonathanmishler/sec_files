@@ -1,0 +1,12 @@
+numpy
+psycopg2-binary
+psycopg[binary]
+pydantic[dotenv]
+sqlmodel
+httpx
+beautifulsoup4
+pandas
+matplotlib
+yfinance
+bokeh
+holoviews
